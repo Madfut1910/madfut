@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>38-0-0 — Madfut Data</title>
+<link rel="icon" type="image/x-icon" href="https://mf-data.b-cdn.net/web/Data Mini Logo (1).png">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/26/css/Card.css">
+<style>
+.game-phase{display:none}.game-phase.active{display:block}
+
+/* Formation grid */
+.formation-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:540px;margin:20px 0}
+@media(max-width:600px){.formation-grid{grid-template-columns:repeat(2,1fr)}}
+.formation-card{background:var(--bg-light);border:2px solid var(--bg-grey);border-radius:10px;padding:14px 10px 10px;text-align:center;cursor:pointer;transition:border-color .15s,transform .12s;user-select:none}
+.formation-card:hover{border-color:#caffde;transform:translateY(-2px)}
+.formation-card.selected{border-color:var(--dark);background:var(--dark)}
+.formation-card.selected .fc-name{color:#caffde}
+.fc-name{font-family:"Cruyff Sans Expanded",sans-serif;font-size:15px;font-weight:900;color:var(--dark);margin-bottom:8px}
+
+/* Buttons */
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;height:42px;padding:0 26px;border-radius:999px;background:var(--dark);color:#fff;font-family:"Roboto Condensed",sans-serif;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:opacity .15s}
+.btn-primary:hover{opacity:.82}.btn-primary:disabled{opacity:.35;cursor:default}
+
+/* League picker */
+.league-picker{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.league-pick-btn{height:36px;padding:0 18px;border-radius:999px;border:2px solid var(--bg-grey);background:var(--bg-light);color:var(--muted);font-family:"Cruyff Sans Expanded",sans-serif;font-size:12px;font-weight:900;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px}
+.league-pick-btn img{width:20px;height:20px;object-fit:contain}
+.league-pick-btn:hover{border-color:#caffde}
+.league-pick-btn.active{border-color:var(--dark);background:var(--dark);color:#caffde}
+
+/* Difficulty picker */
+.difficulty-row{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.diff-pick-btn{flex:1;min-width:140px;padding:14px 16px;border-radius:12px;border:2px solid var(--bg-grey);background:var(--bg-light);cursor:pointer;transition:all .15s;text-align:left}
+.diff-pick-btn:hover{border-color:#caffde;transform:translateY(-2px)}
+.diff-pick-btn.active-easy{border-color:#2e7d32;background:rgba(46,125,50,.08)}
+.diff-pick-btn.active-hard{border-color:#c62828;background:rgba(198,40,40,.08)}
+.diff-pick-btn .dp-label{font-family:"Cruyff Sans Expanded",sans-serif;font-size:15px;font-weight:900;color:var(--dark);margin-bottom:3px}
+.diff-pick-btn .dp-desc{font-family:"Roboto Condensed",sans-serif;font-size:11px;color:var(--muted)}
+.diff-pick-btn.active-easy .dp-label{color:#2e7d32}
+.diff-pick-btn.active-hard .dp-label{color:#c62828}
+
+/* Slot machine */
+.slotmachine-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;margin:16px 0}
+.slotmachine-outer{width:320px;height:132px;overflow:hidden;position:relative;border-radius:14px;border:3px solid var(--dark);background:#111}
+.slotmachine-outer::before,.slotmachine-outer::after{content:'';position:absolute;left:0;right:0;height:36px;z-index:5;pointer-events:none}
+.slotmachine-outer::before{top:0;background:linear-gradient(to bottom,rgba(0,0,0,.75),transparent)}
+.slotmachine-outer::after{bottom:0;background:linear-gradient(to top,rgba(0,0,0,.75),transparent)}
+.slotmachine-highlight{position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);height:44px;border-top:2px solid #caffde;border-bottom:2px solid #caffde;z-index:4;pointer-events:none}
+.slotmachine-reel{display:flex;flex-direction:column;will-change:transform}
+.slotmachine-item{height:44px;display:flex;align-items:center;gap:12px;padding:0 16px;flex-shrink:0}
+.slotmachine-item img{width:28px;height:28px;object-fit:contain;flex-shrink:0;border-radius:4px}
+.slotmachine-item-name{font-family:"Cruyff Sans Expanded",sans-serif;font-size:13px;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slotmachine-pointer{position:absolute;left:-1px;top:50%;transform:translateY(-50%);width:0;height:0;border-top:10px solid transparent;border-bottom:10px solid transparent;border-left:16px solid #caffde;z-index:6}
+.slotmachine-pointer-r{position:absolute;right:-1px;top:50%;transform:translateY(-50%);width:0;height:0;border-top:10px solid transparent;border-bottom:10px solid transparent;border-right:16px solid #caffde;z-index:6}
+
+/* Spin club banner */
+.spin-club-banner{background:var(--bg-light);border:1px solid var(--bg-grey);border-radius:10px;padding:12px 20px;text-align:center;margin-bottom:14px;display:flex;align-items:center;gap:14px;justify-content:center}
+.spin-club-badge{width:44px;height:44px;object-fit:contain}
+.spin-club-text{text-align:left}
+.spin-club-name{font-family:"Cruyff Sans Expanded",sans-serif;font-size:20px;font-weight:900;color:var(--dark);line-height:1.1}
+.spin-club-sub{font-family:"Roboto Condensed",sans-serif;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+/* Club tier label in slot */
+.slot-tier{font-family:"Roboto Condensed",sans-serif;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle}
+.slot-tier-best{background:#c62828;color:#fff}
+.slot-tier-mid{background:#e65100;color:#fff}
+.slot-tier-worst{background:#2e7d32;color:#fff}
+
+/* Progress */
+.progress-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.progress-track{flex:1;height:6px;background:var(--bg-grey);border-radius:999px;overflow:hidden}
+.progress-fill{height:100%;background:#caffde;border-radius:999px;transition:width .4s}
+.progress-label{font-family:"Roboto Condensed",sans-serif;font-size:12px;color:var(--muted);flex-shrink:0;min-width:40px;text-align:right}
+
+/* Team rating stars */
+.team-rating-stars{display:flex;align-items:center;gap:8px;margin-bottom:14px;background:var(--bg-light);border:1px solid var(--bg-grey);border-radius:10px;padding:8px 14px}
+.star-label{font-family:"Roboto Condensed",sans-serif;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;min-width:72px}
+.star-val{font-family:"Cruyff Sans Expanded",sans-serif;font-size:13px;font-weight:900;color:var(--dark);min-width:36px}
+.stars-wrap{display:flex;gap:3px}
+.star{font-size:16px;line-height:1;transition:color .3s}
+.star.on{color:#f9a825}
+.star.half{background:linear-gradient(90deg,#f9a825 50%,#ccc 50%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.star.off{color:#ccc}
+
+/* Picker grid */
+.picker-header{margin-bottom:12px}
+.picker-title{font-family:"Cruyff Sans Expanded",sans-serif;font-size:18px;font-weight:900;color:var(--dark)}
+.picker-subtitle{font-family:"Roboto Condensed",sans-serif;font-size:12px;color:var(--muted);margin-top:2px}
+.picker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:20px 14px;margin-bottom:24px}
+@media(max-width:600px){.picker-grid{grid-template-columns:repeat(2,1fr);gap:16px 10px}}
+.picker-card-wrap{cursor:pointer;border-radius:10px;transition:transform .14s,box-shadow .14s;display:flex;flex-direction:column;align-items:center}
+.picker-card-wrap:hover{transform:scale(1.05);box-shadow:0 8px 24px rgba(0,0,0,.22)}
+.picker-card-wrap.chosen{outline:3px solid var(--dark);border-radius:10px}
+.picker-card-wrap.ineligible{cursor:not-allowed;opacity:0.35}
+.picker-card-wrap.ineligible:hover{transform:none;box-shadow:none}
+
+/* Card scaling box — picker */
+.pcard-box{width:160px;height:224px;overflow:hidden;position:relative;margin:0 auto;border-radius:7px;flex-shrink:0}
+.pcard-scaler{position:absolute;top:0;left:0;width:300px;transform:scale(0.533);transform-origin:top left;pointer-events:none}
+.pcard-scaler .card-menu-wrap,.pcard-scaler .card-dev-panel{display:none !important}
+.pcard-name{font-family:"Roboto Condensed",sans-serif;font-size:11px;font-weight:700;color:var(--muted);text-align:center;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+.pcard-rating{font-family:"Cruyff Sans Expanded",sans-serif;font-size:10px;font-weight:900;color:var(--dark);text-align:center}
+.picker-empty{font-family:"Roboto Condensed",sans-serif;font-size:14px;color:var(--muted);padding:24px 0;text-align:center;grid-column:1/-1}
+.picker-section-label{font-family:"Cruyff Sans Expanded",sans-serif;font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:1px;grid-column:1/-1;margin-top:8px;padding-top:8px;border-top:1px solid var(--bg-grey)}
+
+/* Fallback banner */
+.fallback-banner{background:#fff3cd;border:1px solid #f0c040;border-radius:8px;padding:10px 16px;font-family:"Roboto Condensed",sans-serif;font-size:13px;color:#7a5c00;margin-bottom:14px}
+
+/* Game layout */
+.game-layout{display:flex;gap:22px;align-items:flex-start}
+.game-col-left{flex:1;min-width:0}
+.game-col-right{width:290px;flex-shrink:0;position:sticky;top:calc(var(--nav-h,67px) + var(--bc-h,44px) + 12px)}
+@media(max-width:860px){.game-layout{flex-direction:column}.game-col-right{width:100%;position:static}}
+
+/* Pitch */
+.pitch-container{position:relative;background:linear-gradient(180deg,#2d7a2d 0%,#1e5c1e 100%);border-radius:10px;overflow:hidden;margin-bottom:12px}
+.pitch-slot{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;cursor:pointer}
+.pitch-card-mini{position:relative;width:52px;height:52px}
+.pcm-bg{width:100%;height:100%;object-fit:contain;display:block;border-radius:4px}
+.pcm-face{position:absolute;top:4px;left:50%;transform:translateX(-50%);height:32px;width:auto;object-fit:contain;pointer-events:none}
+.pitch-slot-rating{font-family:"Roboto Condensed",sans-serif;font-size:10px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.8);line-height:1;margin-top:2px}
+.pitch-slot-name{font-family:"Roboto Condensed",sans-serif;font-size:9px;color:rgba(255,255,255,.9);text-shadow:0 1px 3px rgba(0,0,0,.9);max-width:58px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pitch-slot-empty{width:46px;height:46px;border-radius:50%;border:2px dashed rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-family:"Roboto Condensed",sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);background:rgba(0,0,0,.15);transition:border-color .15s,background .15s}
+.pitch-slot.eligible-slot .pitch-slot-empty{border-color:#caffde;color:#caffde;background:rgba(202,255,222,.15);animation:pulse-eligible 1.2s ease-in-out infinite}
+.pitch-slot.eligible-slot:hover .pitch-slot-empty{border-color:#fff;color:#fff;background:rgba(255,255,255,.2)}
+@keyframes pulse-eligible{0%,100%{box-shadow:0 0 0 0 rgba(202,255,222,.5)}50%{box-shadow:0 0 0 6px rgba(202,255,222,0)}}
+
+/* Team bar — small thumbs under pitch (fixed scale) */
+.team-bar{display:flex;gap:8px;overflow-x:auto;padding:8px 6px;background:var(--bg-light);border-radius:10px;margin-bottom:14px;scrollbar-width:none;align-items:flex-start}
+.team-bar::-webkit-scrollbar{display:none}
+.tbar-item{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px}
+.tbar-card-thumb{width:64px;height:89px;overflow:hidden;border-radius:5px;position:relative;flex-shrink:0;background:var(--bg-grey)}
+.tbar-card-thumb .card-and-breakdown,
+.tbar-card-thumb .card-wrapper{
+  position:absolute !important;
+  top:0 !important;
+  left:0 !important;
+  width:300px !important;
+  transform:scale(0.2133) !important;
+  transform-origin:top left !important;
+  pointer-events:none !important;
+}
+.tbar-card-thumb .card{width:300px !important}
+.tbar-card-thumb .card-menu-wrap,.tbar-card-thumb .card-dev-panel{display:none !important}
+.tbar-item-pos{font-family:"Roboto Condensed",sans-serif;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;text-align:center}
+
+/* Final squad bar — bigger cards */
+.final-team-bar{display:flex;gap:10px;overflow-x:auto;padding:10px 6px;background:var(--bg-light);border-radius:10px;margin-bottom:14px;scrollbar-width:none;align-items:flex-start}
+.final-team-bar::-webkit-scrollbar{display:none}
+.ftbar-item{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px}
+.ftbar-card-thumb{width:100px;height:140px;overflow:hidden;border-radius:7px;position:relative;flex-shrink:0;background:var(--bg-grey)}
+.ftbar-card-thumb .card-and-breakdown,
+.ftbar-card-thumb .card-wrapper{
+  position:absolute !important;
+  top:0 !important;
+  left:0 !important;
+  width:300px !important;
+  transform:scale(0.333) !important;
+  transform-origin:top left !important;
+  pointer-events:none !important;
+}
+.ftbar-card-thumb .card{width:300px !important}
+.ftbar-card-thumb .card-menu-wrap,.ftbar-card-thumb .card-dev-panel{display:none !important}
+.ftbar-item-pos{font-family:"Roboto Condensed",sans-serif;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;text-align:center}
+
+/* Pending pick banner */
+.pending-banner{background:var(--dark);color:#caffde;border-radius:10px;padding:12px 18px;margin-bottom:14px;font-family:"Cruyff Sans Expanded",sans-serif;font-size:15px;font-weight:900;text-align:center}
+.pending-banner span{display:block;font-family:"Roboto Condensed",sans-serif;font-size:12px;color:rgba(202,255,222,.7);font-weight:400;margin-top:3px}
+
+/* Season stats */
+.season-stat-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.season-stat{background:var(--bg-light);border:1px solid var(--bg-grey);border-radius:10px;padding:10px 14px;text-align:center;flex:1;min-width:72px}
+.season-stat-val{font-family:"Cruyff Sans Expanded",sans-serif;font-size:26px;font-weight:900;color:var(--dark);line-height:1}
+.season-stat-lbl{font-family:"Roboto Condensed",sans-serif;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.season-table-wrap{overflow-x:auto}
+.season-table{width:100%;border-collapse:collapse;font-family:"Roboto Condensed",sans-serif;font-size:13px}
+.season-table th{background:var(--dark);color:#fff;padding:7px 10px;text-align:left;font-weight:700}
+.season-table td{padding:5px 10px;border-bottom:1px solid var(--bg-grey);color:var(--mid)}
+.season-table tr:hover td{background:var(--bg-light)}
+.res-w{color:#2e7d32;font-weight:700}.res-d{color:#e65100;font-weight:700}.res-l{color:#c62828;font-weight:700}
+.res-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.res-filter-btn{height:30px;padding:0 14px;border-radius:999px;border:1px solid var(--bg-grey);background:var(--bg-light);color:var(--muted);font-family:"Roboto Condensed",sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:background .15s}
+.res-filter-btn.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+.champion-banner{background:linear-gradient(135deg,#b8860b,#ffd700,#b8860b);border-radius:12px;padding:18px;text-align:center;margin-bottom:18px}
+.champion-banner h2{font-family:"Cruyff Sans Expanded",sans-serif;font-size:24px;font-weight:900;color:#3d2000;margin-bottom:4px}
+.champion-banner p{font-family:"Roboto Condensed",sans-serif;font-size:13px;color:#5a3500}
+.game-section-title{font-family:"Cruyff Sans Expanded",sans-serif;font-size:12px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px}
+.diff-badge{display:inline-block;padding:2px 7px;border-radius:999px;font-family:"Roboto Condensed",sans-serif;font-size:11px;font-weight:700}
+.diff-easy{background:#d4edda;color:#1a6630}.diff-med{background:#fff3cd;color:#7a5c00}.diff-hard{background:#fde3e3;color:#9c1e1e}.diff-elite{background:#3d0057;color:#e8b4ff}
+
+/* Spin button */
+.spin-btn-wrap{display:flex;justify-content:center;margin:10px 0}
+.spin-btn{height:48px;padding:0 40px;border-radius:999px;background:var(--dark);color:#caffde;font-family:"Cruyff Sans Expanded",sans-serif;font-size:15px;font-weight:900;border:none;cursor:pointer;letter-spacing:1px;transition:opacity .15s,transform .1s}
+.spin-btn:hover{opacity:.85}.spin-btn:active{transform:scale(.97)}.spin-btn:disabled{opacity:.35;cursor:default}
+
+/* Club rating list (collapsible) */
+.club-rating-list{background:var(--bg-light);border:1px solid var(--bg-grey);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.crl-row{display:flex;align-items:center;gap:10px;padding:7px 12px;border-bottom:1px solid var(--bg-grey);font-family:"Roboto Condensed",sans-serif;font-size:12px}
+.crl-row:last-child{border-bottom:none}
+.crl-badge{width:22px;height:22px;object-fit:contain;flex-shrink:0}
+.crl-name{flex:1;color:var(--dark);font-weight:600}
+.crl-rating{font-family:"Cruyff Sans Expanded",sans-serif;font-size:13px;font-weight:900;color:var(--dark);min-width:28px;text-align:right}
+.crl-bar{flex:2;height:4px;background:var(--bg-grey);border-radius:999px;overflow:hidden}
+.crl-bar-fill{height:100%;border-radius:999px}
+.ratings-toggle-btn{display:inline-flex;align-items:center;gap:6px;background:none;border:1px solid var(--bg-grey);border-radius:999px;padding:4px 12px;font-family:"Roboto Condensed",sans-serif;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;margin-bottom:8px;transition:border-color .15s}
+.ratings-toggle-btn:hover{border-color:var(--dark);color:var(--dark)}
+.ratings-toggle-icon{font-size:14px;line-height:1}
+
+/* League table */
+.league-table-wrap{overflow-x:auto;margin-top:20px}
+.league-table{width:100%;border-collapse:collapse;font-family:"Roboto Condensed",sans-serif;font-size:13px;max-width:680px}
+.league-table th{background:var(--dark);color:#fff;padding:7px 8px;text-align:center;font-weight:700;font-size:11px;white-space:nowrap}
+.league-table th:nth-child(3){text-align:left}
+.league-table td{padding:5px 8px;border-bottom:1px solid var(--bg-grey);color:var(--mid);text-align:center;white-space:nowrap}
+.league-table td:nth-child(3){text-align:left;font-weight:600;color:var(--dark)}
+.league-table tr:hover td{background:var(--bg-light)}
+.lt-you td{background:rgba(202,255,222,.12) !important;font-weight:700}
+.lt-you td:nth-child(3){color:#1a6630}
+.lt-pos{font-weight:700;min-width:22px}
+.lt-badge{width:20px;height:20px;object-fit:contain;vertical-align:middle}
+.lt-zone-ucl{border-left:3px solid #120993}
+.lt-zone-uel{border-left:3px solid #ff6c3b}
+.lt-zone-rel{border-left:3px solid #9e2828}
+.lt-zone-mid{border-left:3px solid transparent}
+</style>
+</head>
+<body>
+
+<nav class="breadcrumb-bar" aria-label="Breadcrumb">
+  <div class="breadcrumb-scroll">
+    <a href="/index.html">DATA</a><span>›</span>
+    <a href="/26/Database.html">DATABASE</a><span>›</span>
+    <a href="/26/38-0-0.html" class="bc-current">38-0-0</a>
+  </div>
+</nav>
+
+<main class="main-content">
+  <h1 class="page-heading">38-0-0</h1>
+  <p class="page-desc">Pick a league, choose a formation, spin for a club, pick a player — build your 11 and simulate a 38-match season against all 19 other clubs (home &amp; away).</p>
+
+  <div id="game-loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:40vh;gap:14px">
+    <div class="mf-spinner"></div>
+    <p class="mf-loading-label" id="loadingLabel">Loading card database…</p>
+  </div>
+
+  <!-- PHASE 1: FORMATION -->
+  <div class="game-phase" id="phase-formation">
+
+    <div class="game-section-title">Step 1 — Choose your league</div>
+    <div class="league-picker" id="leaguePicker">
+      <button class="league-pick-btn active" data-league="pl" onclick="selectLeague('pl',this)">
+        <img src="https://mf-data.b-cdn.net/26/Badges/Leagues/Large/league_large_13.png" alt="PL" onerror="this.style.display='none'">
+        Premier League
+      </button>
+      <button class="league-pick-btn" data-league="laliga" onclick="selectLeague('laliga',this)">
+        <img src="https://mf-data.b-cdn.net/26/Badges/Leagues/Large/league_large_53.png" alt="LaLiga" onerror="this.style.display='none'">
+        LaLiga
+      </button>
+      <button class="league-pick-btn" data-league="championship" onclick="selectLeague('championship',this)">
+        <img src="https://mf-data.b-cdn.net/26/Badges/Leagues/Large/league_large_14.png" alt="Championship" onerror="this.style.display='none'">
+        Championship
+      </button>
+    </div>
+
+    <div class="game-section-title">Step 2 — Choose your difficulty</div>
+    <div class="difficulty-row" id="difficultyRow">
+      <button class="diff-pick-btn active-easy" data-diff="easy" onclick="selectDifficulty('easy',this)">
+        <div class="dp-label">🟢 Easy</div>
+        <div class="dp-desc">All clubs in the roulette — you can land on any team including the best</div>
+      </button>
+      <button class="diff-pick-btn" data-diff="hard" onclick="selectDifficulty('hard',this)">
+        <div class="dp-label">🔴 Hard</div>
+        <div class="dp-desc">Top clubs removed — you'll only spin mid-table and weaker sides</div>
+      </button>
+    </div>
+
+    <div id="clubRatingListWrap" style="margin-bottom:16px">
+      <button class="ratings-toggle-btn" id="ratingsToggleBtn" onclick="toggleRatings()">
+        <span class="ratings-toggle-icon">⋯</span> Club strength ratings
+      </button>
+      <div id="clubRatingListInner" style="display:none">
+        <div class="club-rating-list" id="clubRatingList"></div>
+      </div>
+    </div>
+
+    <div class="game-section-title">Step 3 — Choose your formation</div>
+    <p style="font-family:'Roboto Condensed',sans-serif;font-size:13px;color:var(--muted);margin-bottom:4px">6 formations drawn at random. Pick one to start.</p>
+    <div class="formation-grid" id="formationGrid"></div>
+    <button class="btn-primary" id="btnConfirmFormation" disabled>Confirm Formation →</button>
+  </div>
+
+  <!-- PHASE 2: BUILD -->
+  <div class="game-phase" id="phase-build">
+    <div class="game-layout">
+      <div class="game-col-left">
+        <div class="progress-row">
+          <div class="progress-track"><div class="progress-fill" id="buildProgress" style="width:0%"></div></div>
+          <div class="progress-label" id="buildProgressLabel">0/11</div>
+        </div>
+
+        <div id="wheelArea">
+          <div class="slotmachine-wrap">
+            <div class="slotmachine-outer" id="slotMachineOuter">
+              <div class="slotmachine-highlight"></div>
+              <div class="slotmachine-pointer"></div>
+              <div class="slotmachine-pointer-r"></div>
+              <div class="slotmachine-reel" id="slotReel"></div>
+            </div>
+            <div class="spin-btn-wrap">
+              <button class="spin-btn" id="btnSpin">▶ SPIN FOR A CLUB</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="fallback-banner" id="fallbackBanner" style="display:none"></div>
+
+        <div id="postSpinArea" style="display:none">
+          <div id="spinBanner"></div>
+          <div id="pendingBanner" style="display:none"></div>
+          <div id="pickerArea">
+            <div class="picker-header">
+              <div class="picker-title" id="pickerTitle">Pick a player</div>
+              <div class="picker-subtitle" id="pickerSubtitle"></div>
+            </div>
+            <div class="picker-grid" id="pickerGrid"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="game-col-right">
+        <div class="game-section-title">Your Team</div>
+
+        <div class="team-rating-stars" id="teamRatingStars" style="display:none">
+          <div class="star-label">Team Rating</div>
+          <div class="stars-wrap" id="starsWrap"></div>
+          <div class="star-val" id="starRatingVal"></div>
+        </div>
+
+        <div id="pitchWrap"></div>
+        <div class="team-bar" id="teamBar" style="display:none"></div>
+        <div id="btnSimWrap" style="display:none;text-align:center;margin-top:12px">
+          <button class="btn-primary" id="btnSimulate">▶ Simulate Season</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 3: SEASON -->
+  <div class="game-phase" id="phase-season">
+    <div id="championBannerWrap"></div>
+    <div class="season-stat-row" id="seasonStats"></div>
+    <div id="seasonTeamSummary" style="margin-bottom:18px"></div>
+
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <button class="res-filter-btn active" id="tabMatches" onclick="showSeasonTab('matches')">Match Results</button>
+      <button class="res-filter-btn" id="tabTable" onclick="showSeasonTab('table')">League Table</button>
+    </div>
+
+    <div id="seasonMatchesPane">
+      <div class="res-filter-row" id="resFilterRow">
+        <button class="res-filter-btn active" data-filter="all">All 38</button>
+        <button class="res-filter-btn" data-filter="W">Wins</button>
+        <button class="res-filter-btn" data-filter="D">Draws</button>
+        <button class="res-filter-btn" data-filter="L">Losses</button>
+      </div>
+      <div class="season-table-wrap">
+        <table class="season-table">
+          <thead><tr><th>#</th><th>H/A</th><th>Opponent</th><th>Score</th><th>Res</th><th>Pts</th></tr></thead>
+          <tbody id="seasonTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="seasonTablePane" style="display:none">
+      <div class="league-table-wrap">
+        <table class="league-table" id="leagueTable">
+          <thead><tr><th>#</th><th></th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th></tr></thead>
+          <tbody id="leagueTableBody"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-family:'Roboto Condensed',sans-serif;font-size:11px">
+        <span style="color:#120993;font-weight:700">■ UCL</span>
+        <span style="color:#ff6c3b;font-weight:700">■ UEL</span>
+        <span style="color:#9e2828;font-weight:700">■ Relegation</span>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:22px">
+      <button class="btn-primary" id="btnPlayAgain">↺ Play Again</button>
+    </div>
+  </div>
+</main>
+
+<script src="/Template26.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  38-0-0
+// ═══════════════════════════════════════════════════════════════
+
+// ─── FIX 3: Club name lookup map ─────────────────────────────
+// Used to resolve names for SPIN_POOL_CLUBS entries that have no hardcoded name
+const CLUB_NAME_MAP = {
+  "1":"Arsenal","2":"Aston Villa","3":"Blackburn Rovers","4":"Bolton","5":"Chelsea",
+  "7":"Everton","8":"Leeds United","9":"Liverpool","10":"Manchester City",
+  "11":"Manchester Utd","12":"Middlesbrough","13":"Newcastle Utd","14":"Nott'm Forest",
+  "15":"QPR","17":"Southampton","18":"Spurs","19":"West Ham","21":"Bayern München",
+  "22":"Borussia Dortmund","25":"Freiburg","28":"Hamburger","31":"Köln",
+  "32":"Leverkusen","36":"Stuttgart","45":"Juventus","50":"Parma","52":"Roma",
+  "54":"Torino","55":"Udinese","64":"Lens","65":"Lille","66":"OL","69":"Monaco",
+  "70":"Montpellier","71":"Nantes","72":"Nice","73":"PSG","74":"Rennais",
+  "76":"Strasbourg","78":"Celtic","86":"Rangers","88":"Birmingham City",
+  "89":"Charlton Ath","91":"Derby County","94":"Ipswich","97":"Millwall",
+  "106":"Sunderland","109":"West Brom","110":"Wolves","144":"Fulham",
+  "149":"Lincoln City","189":"Bologna","219":"OM","231":"Club Brugge",
+  "234":"Benfica","236":"Porto","237":"Sporting","240":"Atlético","241":"Barcelona",
+  "243":"Real Madrid","266":"Slavia Praha","280":"Olympiacos","298":"Rosenborg",
+  "325":"Galatasaray","326":"Fenerbahçe","347":"Lecce","378":"Brestois",
+  "393":"PAOK","448":"Athletic Club","449":"Real Betis","450":"Celta",
+  "452":"Espanyol","453":"Mallorca","457":"Real Sociedad","461":"Valencia",
+  "463":"D. Alavés","468":"Elche","472":"Las Palmas","479":"Osasuna",
+  "480":"Rayo Vallecano","481":"Sevilla","483":"Villarreal","517":"Botafogo",
+  "605":"Al Hilal","607":"Al Ittihad","900":"Young Boys","1745":"Como",
+  "1792":"Norwich","1796":"Burnley","1799":"Crystal Palace","1800":"Coventry City",
+  "1801":"Preston","1806":"Stoke City","1807":"Sheffield Wed","1808":"Brighton",
+  "1809":"Toulouse","1824":"Frankfurt","1831":"Union Berlin","1843":"Palermo",
+  "1853":"Levante UD","1860":"Getafe","1876":"River Plate","1884":"Panathinaikos",
+  "1896":"Braga","1919":"Bristol City","1923":"Luton Town","1925":"Brentford",
+  "1939":"Huddersfield","1943":"Bournemouth","1947":"Wrexham AFC","1952":"Hull City",
+  "1960":"Swansea City","1961":"Cardiff City","10029":"TSG Hoffenheim",
+  "12172":"RB Leipzig","100409":"Augsburg","101059":"Shakhtar Donetsk",
+  "110062":"Girona","110374":"Fiorentina","110827":"R. Oviedo","112139":"Al Nassr",
+  "112172":"RB Leipzig","112658":"Icons","112893":"Inter Miami","112996":"LAFC",
+  "114605":"Heroes","115841":"Latium","115845":"Bergamo Calcio",
+  "131681":"Milano FC","131682":"Lombardia FC"
+};
+
+function getClubName(id){
+  return CLUB_NAME_MAP[String(id)] || `Club ${id}`;
+}
+
+// ─── LEAGUE DEFINITIONS ──────────────────────────────────────
+const LEAGUES = {
+  pl: {
+    name: "PremierLeague",
+    leagueId: "13",
+    clubs: [
+      { id:"9",    team_rating:88, tier:"best"  },
+      { id:"10",   team_rating:88, tier:"best"  },
+      { id:"1",    team_rating:88, tier:"best"  },
+      { id:"5",    team_rating:84, tier:"best"  },
+      { id:"13",   team_rating:85, tier:"mid"   },
+      { id:"11",   team_rating:86, tier:"best"  },
+      { id:"2",    team_rating:86, tier:"mid"   },
+      { id:"1808", team_rating:84, tier:"mid"   },
+      { id:"18",   team_rating:76, tier:"worst" },
+      { id:"14",   team_rating:72, tier:"worst" },
+      { id:"1799", team_rating:78, tier:"mid"   },
+      { id:"144",  team_rating:77, tier:"worst" },
+      { id:"1925", team_rating:79, tier:"mid"   },
+      { id:"1800", team_rating:72, tier:"worst" },
+      { id:"1943", team_rating:83, tier:"mid"   },
+      { id:"106",  team_rating:83, tier:"mid"   },
+      { id:"1952", team_rating:69, tier:"worst" },
+      { id:"94",   team_rating:50, tier:"worst" },
+      { id:"7",    team_rating:80, tier:"mid"   },
+      { id:"8",    team_rating:79, tier:"worst" },
+    ]
+  },
+  laliga: {
+    name: "LaLiga",
+    leagueId: "53",
+    clubs: [
+      { id:"241",    team_rating:93, tier:"best"  },
+      { id:"243",    team_rating:93, tier:"best"  },
+      { id:"240",    team_rating:88, tier:"best"  },
+      { id:"483",    team_rating:83, tier:"best"  },
+      { id:"481",    team_rating:82, tier:"best"  },
+      { id:"461",    team_rating:80, tier:"mid"   },
+      { id:"457",    team_rating:80, tier:"mid"   },
+      { id:"449",    team_rating:79, tier:"mid"   },
+      { id:"448",    team_rating:78, tier:"mid"   },
+      { id:"110062", team_rating:76, tier:"mid"   },
+      { id:"479",    team_rating:74, tier:"mid"   },
+      { id:"480",    team_rating:73, tier:"mid"   },
+      { id:"450",    team_rating:73, tier:"mid"   },
+      { id:"453",    team_rating:72, tier:"worst" },
+      { id:"1860",   team_rating:71, tier:"worst" },
+      { id:"463",    team_rating:70, tier:"worst" },
+      { id:"1853",   team_rating:69, tier:"worst" },
+      { id:"472",    team_rating:68, tier:"worst" },
+      { id:"110827", team_rating:68, tier:"worst" },
+      { id:"468",    team_rating:67, tier:"worst" },
+    ]
+  },
+  championship: {
+    name: "Championship",
+    leagueId: "14",
+    clubs: [
+      { id:"110",  team_rating:78, tier:"best"  },
+      { id:"1796", team_rating:77, tier:"best"  },
+      { id:"88",   team_rating:76, tier:"best"  },
+      { id:"1794", team_rating:76, tier:"best"  },
+      { id:"109",  team_rating:76, tier:"best"  },
+      { id:"1792", team_rating:75, tier:"mid"   },
+      { id:"1795", team_rating:75, tier:"mid"   },
+      { id:"3",    team_rating:74, tier:"mid"   },
+      { id:"1790", team_rating:74, tier:"mid"   },
+      { id:"1960", team_rating:74, tier:"mid"   },
+      { id:"1923", team_rating:74, tier:"mid"   },
+      { id:"1806", team_rating:73, tier:"mid"   },
+      { id:"12",   team_rating:73, tier:"mid"   },
+      { id:"1919", team_rating:73, tier:"mid"   },
+      { id:"1801", team_rating:72, tier:"worst" },
+      { id:"1961", team_rating:72, tier:"worst" },
+      { id:"91",   team_rating:72, tier:"worst" },
+      { id:"1807", team_rating:72, tier:"worst" },
+      { id:"15",   team_rating:70, tier:"worst" },
+      { id:"1947", team_rating:70, tier:"worst" },
+      { id:"89",   team_rating:71, tier:"worst" },
+      { id:"1939", team_rating:69, tier:"worst" },
+      { id:"149",  team_rating:68, tier:"worst" },
+      { id:"97",   team_rating:71, tier:"worst" },
+    ]
+  }
+};
+
+// FIX 3: Add name getter to each club at runtime
+function enrichLeagueClubs(){
+  Object.values(LEAGUES).forEach(league => {
+    league.clubs.forEach(club => {
+      if(!club.name) club.name = getClubName(club.id);
+    });
+  });
+}
+
+const SPIN_POOL_CLUBS = [
+  { id:"112658", tier:"best"  },
+  { id:"114605", tier:"best"  },
+  { id:"241",    tier:"best"  },
+  { id:"10",     tier:"best"  },
+  { id:"1",      tier:"best"  },
+  { id:"243",    tier:"best"  },
+  { id:"9",      tier:"best"  },
+  { id:"21",     tier:"best"  },
+  { id:"73",     tier:"best"  },
+  { id:"66",     tier:"best"  },
+  { id:"5",      tier:"best"  },
+  { id:"131682", tier:"best"  },
+  { id:"240",    tier:"best"  },
+  { id:"11",     tier:"best"  },
+  { id:"131681", tier:"best"  },
+  { id:"45",     tier:"best"  },
+  { id:"32",     tier:"best"  },
+  { id:"2",      tier:"best"  },
+  { id:"22",     tier:"best"  },
+  { id:"13",     tier:"best"  },
+  { id:"52",     tier:"best"  },
+  { id:"112139", tier:"best"  },
+  { id:"18",     tier:"best"  },
+  { id:"219",    tier:"best"  },
+  { id:"1824",   tier:"best"  },
+  { id:"605",    tier:"best"  },
+  { id:"448",    tier:"best"  },
+  { id:"325",    tier:"best"  },
+  { id:"1808",   tier:"best"  },
+  { id:"14",     tier:"mid"   },
+  { id:"115845", tier:"mid"   },
+  { id:"457",    tier:"mid"   },
+  { id:"112172", tier:"mid"   },
+  { id:"326",    tier:"mid"   },
+  { id:"115841", tier:"mid"   },
+  { id:"237",    tier:"mid"   },
+  { id:"19",     tier:"mid"   },
+  { id:"483",    tier:"mid"   },
+  { id:"234",    tier:"mid"   },
+  { id:"607",    tier:"mid"   },
+  { id:"1799",   tier:"mid"   },
+  { id:"449",    tier:"mid"   },
+  { id:"7",      tier:"mid"   },
+  { id:"1943",   tier:"mid"   },
+  { id:"69",     tier:"mid"   },
+  { id:"110374", tier:"mid"   },
+  { id:"36",     tier:"mid"   },
+  { id:"144",    tier:"mid"   },
+  { id:"450",    tier:"mid"   },
+  { id:"25",     tier:"mid"   },
+  { id:"453",    tier:"mid"   },
+  { id:"479",    tier:"mid"   },
+  { id:"480",    tier:"mid"   },
+  { id:"236",    tier:"mid"   },
+  { id:"280",    tier:"mid"   },
+  { id:"106",    tier:"mid"   },
+  { id:"110062", tier:"mid"   },
+  { id:"10029",  tier:"mid"   },
+  { id:"189",    tier:"mid"   },
+  { id:"1745",   tier:"mid"   },
+  { id:"1925",   tier:"mid"   },
+  { id:"54",     tier:"mid"   },
+  { id:"110",    tier:"mid"   },
+  { id:"78",     tier:"mid"   },
+  { id:"72",     tier:"mid"   },
+  { id:"65",     tier:"mid"   },
+  { id:"74",     tier:"mid"   },
+  { id:"481",    tier:"mid"   },
+  { id:"1876",   tier:"mid"   },
+  { id:"452",    tier:"mid"   },
+  { id:"8",      tier:"mid"   },
+  { id:"31",     tier:"mid"   },
+  { id:"1831",   tier:"mid"   },
+  { id:"1896",   tier:"mid"   },
+  { id:"1796",   tier:"mid"   },
+  { id:"76",     tier:"worst" },
+  { id:"266",    tier:"worst" },
+  { id:"100409", tier:"worst" },
+  { id:"94",     tier:"worst" },
+  { id:"70",     tier:"worst" },
+  { id:"71",     tier:"worst" },
+  { id:"112893", tier:"worst" },
+  { id:"393",    tier:"worst" },
+  { id:"278",    tier:"worst" },
+  { id:"378",    tier:"worst" },
+  { id:"231",    tier:"worst" },
+  { id:"64",     tier:"worst" },
+  { id:"50",     tier:"worst" },
+  { id:"55",     tier:"worst" },
+  { id:"86",     tier:"worst" },
+  { id:"28",     tier:"worst" },
+  { id:"1809",   tier:"worst" },
+  { id:"347",    tier:"worst" },
+  { id:"112996", tier:"worst" },
+  { id:"1792",   tier:"worst" },
+  { id:"101059", tier:"worst" },
+  { id:"472",    tier:"worst" },
+  { id:"17",     tier:"worst" },
+  { id:"12",     tier:"worst" },
+  { id:"900",    tier:"worst" },
+];
+
+// Current settings
+let activeLeague = 'pl';
+let activeDifficulty = 'easy';
+let ratingsVisible = false;
+
+function getLeagueClubs(){
+  return LEAGUES[activeLeague].clubs;
+}
+
+function getSpinClubs(){
+  const weighted = [];
+  if(activeDifficulty === 'hard'){
+    SPIN_POOL_CLUBS.forEach(c => {
+      const copies = c.tier === 'best' ? 1 : c.tier === 'mid' ? 3 : 6;
+      for(let i = 0; i < copies; i++) weighted.push({...c, name: getClubName(c.id)});
+    });
+  } else {
+    SPIN_POOL_CLUBS.forEach(c => {
+      const copies = c.tier === 'best' ? 13 : c.tier === 'mid' ? 5 : 2;
+      for(let i = 0; i < copies; i++) weighted.push({...c, name: getClubName(c.id)});
+    });
+  }
+  return weighted;
+}
+
+function selectLeague(key, btn){
+  activeLeague = key;
+  document.querySelectorAll('.league-pick-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderClubRatingList();
+}
+window.selectLeague = selectLeague;
+
+function selectDifficulty(diff, btn){
+  activeDifficulty = diff;
+  document.querySelectorAll('.diff-pick-btn').forEach(b=>{
+    b.classList.remove('active-easy','active-hard');
+  });
+  btn.classList.add(diff === 'easy' ? 'active-easy' : 'active-hard');
+}
+window.selectDifficulty = selectDifficulty;
+
+function toggleRatings(){
+  ratingsVisible = !ratingsVisible;
+  document.getElementById('clubRatingListInner').style.display = ratingsVisible ? '' : 'none';
+  document.getElementById('ratingsToggleBtn').querySelector('.ratings-toggle-icon').textContent = ratingsVisible ? '✕' : '⋯';
+  if(ratingsVisible) renderClubRatingList();
+}
+window.toggleRatings = toggleRatings;
+
+function clubBadgeUrl(id){ return `https://mf-data.b-cdn.net/26/Badges/Clubs/Large/club_large_${id}.png`; }
+
+function renderClubRatingList(){
+  const clubs = getLeagueClubs();
+  const sorted = [...clubs].sort((a,b)=>b.team_rating - a.team_rating);
+  const max = sorted[0].team_rating;
+  const min = sorted[sorted.length-1].team_rating;
+  const range = max - min || 1;
+
+  const tierLabel = { best:'BEST', mid:'MID', worst:'WORST' };
+  const tierColor = { best:'#c62828', mid:'#e65100', worst:'#2e7d32' };
+
+  const list = document.getElementById('clubRatingList');
+  if(!list) return;
+  list.innerHTML = sorted.map(c=>{
+    const pct = Math.round(((c.team_rating - min)/range)*100);
+    const color = tierColor[c.tier] || '#2e7d32';
+    return `<div class="crl-row">
+      <img class="crl-badge" src="${clubBadgeUrl(c.id)}" alt="" onerror="this.style.opacity='.2'">
+      <div class="crl-name">${c.name}</div>
+      <span style="font-family:'Roboto Condensed',sans-serif;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:${color}20;color:${color};flex-shrink:0">${tierLabel[c.tier]||''}</span>
+      <div class="crl-bar"><div class="crl-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="crl-rating">${c.team_rating}</div>
+    </div>`;
+  }).join('');
+}
+
+function buildFixtures(myClubId) {
+  const others = getLeagueClubs().filter(c => c.id !== myClubId);
+  const fixtures = [];
+  others.forEach(opp => fixtures.push({ ...opp, venue:'H' }));
+  others.forEach(opp => fixtures.push({ ...opp, venue:'A' }));
+  return fixtures.sort(() => Math.random() - 0.5);
+}
+
+function isBaseCard(color){
+  if(!color) return false;
+  const c=color.toLowerCase().trim();
+  return ['gold','silver','bronze','rare_gold','rare_silver','rare_bronze',
+          'gold_rare','silver_rare','bronze_rare'].includes(c);
+}
+
+// ─── FIX 4: Special club IDs that bypass base-card filter ────
+// Icons, Heroes, Lombardia FC, Milano FC — these use special card colors
+const SPECIAL_CLUB_IDS = new Set(['112658','114605','131681','131682']);
+
+const FORMATIONS = [
+  { name:"3-1-4-2",       positions:["ST","ST","LM","CM","CM","RM","CDM","CB","CB","CB","GK"] },
+  { name:"3-4-1-2",       positions:["ST","ST","CAM","LM","CM","CM","RM","CB","CB","CB","GK"] },
+  { name:"3-4-2-1",       positions:["ST","CAM","CAM","LM","CM","CM","RM","CB","CB","CB","GK"] },
+  { name:"3-4-3",         positions:["ST","LW","RW","LM","CM","CM","RM","CB","CB","CB","GK"] },
+  { name:"3-5-2",         positions:["ST","ST","CAM","LM","RM","CDM","CDM","CB","CB","CB","GK"] },
+  { name:"4-1-2-1-2",     positions:["ST","ST","CAM","LM","RM","CDM","LB","CB","CB","RB","GK"] },
+  { name:"4-1-2-1-2 (2)", positions:["ST","ST","CAM","CM","CM","CDM","LB","CB","CB","RB","GK"] },
+  { name:"4-1-4-1",       positions:["ST","LW","RW","CAM","CDM","CDM","LB","CB","CB","RB","GK"] },
+  { name:"4-2-2-2",       positions:["ST","ST","CAM","CAM","CDM","CDM","LB","CB","CB","RB","GK"] },
+  { name:"4-2-3-1",       positions:["ST","CAM","CAM","CAM","CDM","CDM","LB","CB","CB","RB","GK"] },
+  { name:"4-3-3",         positions:["ST","LW","RW","CM","CM","CM","LB","CB","CB","RB","GK"] },
+  { name:"4-3-3 (2)",     positions:["ST","LW","RW","CM","CM","CDM","LB","CB","CB","RB","GK"] },
+  { name:"4-3-3 (3)",     positions:["ST","LW","RW","CAM","CM","CM","LB","CB","CB","RB","GK"] },
+  { name:"4-4-2",         positions:["ST","ST","LM","CM","CM","RM","LB","CB","CB","RB","GK"] },
+  { name:"4-4-2 (2)",     positions:["ST","ST","LM","RM","CDM","CDM","LB","CB","CB","RB","GK"] },
+  { name:"4-5-1",         positions:["ST","CAM","CAM","LM","CM","RM","LB","CB","CB","RB","GK"] },
+  { name:"5-2-3",         positions:["ST","LW","RW","CM","CM","LB","CB","CB","CB","RB","GK"] },
+  { name:"5-3-2",         positions:["ST","ST","CM","CM","CM","LB","CB","CB","CB","RB","GK"] },
+  { name:"5-4-1",         positions:["ST","LM","RM","CM","CM","LB","CB","CB","CB","RB","GK"] },
+];
+
+function getPlayerPositions(f){
+  const main=(f.position?.stringValue||'').toUpperCase().trim();
+  const altRaw=(f.altPositions?.stringValue||'');
+  const alts=altRaw.split(',').map(s=>s.toUpperCase().trim()).filter(Boolean);
+  return [...new Set(main?[main,...alts]:alts)];
+}
+function playerCanFillSlot(f,slotPos){
+  return getPlayerPositions(f).includes((slotPos||'').toUpperCase().trim());
+}
+
+const databases={
+  updates:    'https://firestore.googleapis.com/v1/projects/trivela-madfut/databases/(default)/documents/updates/',
+  sbcGroups:  'https://firestore.googleapis.com/v1/projects/trivela-madfut/databases/(default)/documents/sbcGroups/',
+  objectives: 'https://firestore.googleapis.com/v1/projects/trivela-madfut/databases/(default)/documents/objectives/',
+  evosElite:  'https://firestore.googleapis.com/v1/projects/trivela-madfut/databases/(default)/documents/evosElite/',
+  draftCups:  'https://firestore.googleapis.com/v1/projects/trivela-madfut/databases/(default)/documents/draftCups/',
+  ltm:        '/26/json/LtmCards.json',
+  realmExport:'/26/json/realmExport.json'
+};
+const singleDbs=['realmExport','ltm'];
+
+async function fetchDoc(url,dbName){
+  try{
+    const res=await fetch(url);if(!res.ok)return[];
+    const data=await res.json();
+    const players=data.fields?.players?.arrayValue?.values||[];
+    return players.map(p=>({...p,database:dbName}));
+  }catch(e){return[]}
+}
+async function fetchAllPlayersRaw(){
+  document.getElementById('loadingLabel').textContent='Fetching players…';
+  const all=[];
+  for(const[dbName,baseURL]of Object.entries(databases)){
+    if(singleDbs.includes(dbName)){all.push(...await fetchDoc(baseURL,dbName));}
+    else{
+      const batch=[];
+      for(let i=150;i>=1;i--)batch.push(fetchDoc(`${baseURL}${i}`,dbName));
+      all.push(...(await Promise.all(batch)).flat());
+    }
+  }
+  const priority=['objectives','sbcGroups','draftCups','ltm','realmExport','evosElite','updates'];
+  const getPrio=db=>{const i=priority.indexOf(db);return i===-1?99:i;};
+  const idMap=new Map();let noid=0;
+  all.forEach(p=>{
+    let id=p?.mapValue?.fields?.id?.stringValue;
+    if(!id)id=`__noid_${p.database}_${noid++}`;
+    const ex=idMap.get(id);
+    if(!ex||getPrio(p.database)<getPrio(ex.database))idMap.set(id,p);
+  });
+  return Array.from(idMap.values());
+}
+async function fetchColorMap(){
+  const cm={};
+  try{
+    const[lr,fr]=await Promise.all([
+      fetch('/26/json/color.json').catch(()=>null),
+      fetch('https://firestore.googleapis.com/v1/projects/trivela-madfut/databases/(default)/documents/images').catch(()=>null)
+    ]);
+    const sources=[];
+    if(lr?.ok){const d=await lr.json();if(d?.documents)sources.push(...d.documents);}
+    if(fr?.ok){const d=await fr.json();if(d?.documents)sources.push(...d.documents);}
+    sources.forEach(doc=>{
+      const imgs=doc.fields?.images?.arrayValue?.values||[doc];
+      imgs.forEach(item=>{
+        const f=item.mapValue?.fields||{};
+        const id=(f.id?.stringValue||f.name?.stringValue||'').trim().toLowerCase();
+        if(!id)return;
+        cm[id]={url_big:f.url_big?.stringValue||null,url_micro:f.url_micro?.stringValue||null,
+          url_small:f.url_small?.stringValue||null,top_text_color:f.top_text_color?.stringValue||'#000',
+          middle_text_color:f.middle_text_color?.stringValue||'#fff',bottom_text_color:f.bottom_text_color?.stringValue||'#fff',
+          alt_pos_background:f.alt_pos_background?.stringValue||'#333',alt_pos_text:f.alt_pos_text?.stringValue||'#fff',
+          alt_pos_outline:f.alt_pos_outline?.stringValue||'#000'};
+      });
+    });
+  }catch(e){}
+  return cm;
+}
+
+function escAttr(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+
+function buildCardHTML(p,cmap){
+  const f=p?.mapValue?.fields||{};
+  const name=f.name?.stringValue||'Unknown';
+  const rating=f.rating?.integerValue||'0';
+  const position=f.position?.stringValue||'NA';
+  const altPos=f.altPositions?.stringValue||'';
+  const pac=f.PAC?.integerValue||'0',sho=f.SHO?.integerValue||'0';
+  const pas=f.PAS?.integerValue||'0',dri=f.DRI?.integerValue||'0';
+  const def=f.DEF?.integerValue||'0',phy=f.PHY?.integerValue||'0';
+  const atk=f.attack?.integerValue||'0',ctl=f.control?.integerValue||'0',dfn=f.defense?.integerValue||'0';
+  const nationId=f.nationId?.integerValue||'0';
+  const leagueId=f.leagueId?.integerValue||'0';
+  const clubId=f.clubId?.integerValue||'0';
+  const color=(f.color?.stringValue||'default').toLowerCase().trim();
+  const idRaw=f.id?.stringValue||'';
+  const id=idRaw.replace(/^id/,'');
+  const baseId=f.baseId?.integerValue||id;
+  const cm=cmap[color]||{};
+  const cardBg=cm.url_big||`https://mf-data.b-cdn.net/26/Colors/${color}_big.png`;
+  const topClr=cm.top_text_color||'#000',midClr=cm.middle_text_color||'#fff',botClr=cm.bottom_text_color||'#fff';
+  const altBg=cm.alt_pos_background||'#333',altTxt=cm.alt_pos_text||'#fff',altOut=cm.alt_pos_outline||'#000';
+  const isGK=position.toUpperCase()==='GK';
+  const statLbls=isGK?['DIV','HAN','KIC','REF','SPD','POS']:['PAC','SHO','PAS','DRI','DEF','PHY'];
+  const statVals=[pac,sho,pas,dri,def,phy];
+  const A=parseInt(atk)||0,C=parseInt(ctl)||0,D=parseInt(dfn)||0;
+  const hi=Math.max(A,C,D);
+  const fCode=`${A>=hi-3?1:0}${C>=hi-3?1:0}${D>=hi-3?1:0}`;
+  const fImg=`https://mf-data.b-cdn.net/26/Fatal/Stats/fatal_card_stats_${fCode}.png`;
+  const altHtml=altPos?altPos.split(',').map(ap=>{
+    const[r,g,b]=[parseInt(altBg.slice(1,3),16),parseInt(altBg.slice(3,5),16),parseInt(altBg.slice(5,7),16)];
+    return `<div class="alt-pos" style="background:rgba(${r},${g},${b},.8);color:${altTxt};border:1px solid ${altOut}">${ap.trim()}</div>`;
+  }).join(''):'';
+  return `<div class="card-and-breakdown"><div class="card-wrapper"><div class="card">
+    <img src="${escAttr(cardBg)}" alt="${escAttr(color)} card">
+    <div class="overall-position">
+      <div class="overall player-rating" style="color:${topClr}">${rating}</div>
+      <div class="position player-position" style="color:${topClr}">${position}</div>
+    </div>
+    ${altHtml?`<div class="alt-positions">${altHtml}</div>`:''}
+    <div class="player-name" style="color:${midClr}">${escAttr(name)}</div>
+    <div class="stats">${statLbls.map((l,i)=>`<div class="stat"><div class="stat-label" style="color:${botClr}">${l}</div><div class="stat-value" style="color:${botClr}">${statVals[i]}</div></div>`).join('')}</div>
+    <div class="fatals">
+      <img class="fatal-bg" src="${fImg}" alt="fatal">
+      <div class="fatal-value-container">
+        <div class="fatal-value">${atk}</div><div class="fatal-value">${ctl}</div><div class="fatal-value">${dfn}</div>
+      </div>
+    </div>
+    <div class="badges">
+      <img class="badge flag" src="https://mf-data.b-cdn.net/26/Badges/Nations/Large/nation_large_${nationId}.png" alt="">
+      <img class="badge league" src="https://mf-data.b-cdn.net/26/Badges/Leagues/Large/league_large_${leagueId}.png" alt="">
+      <img class="badge club" src="https://mf-data.b-cdn.net/26/Badges/Clubs/Large/club_large_${clubId}.png" alt="">
+    </div>
+    <img class="player-face"
+      src="https://trivela.b-cdn.net/26/normalFacesSmall/${id}.png" alt="${escAttr(name)}"
+      onerror="if(!this.dataset.step){this.dataset.step='p';this.classList.add('normal-face');this.src='https://trivela.b-cdn.net/26/faces/p${id}.png';}else if(this.dataset.step==='p'){this.dataset.step='base';this.classList.remove('normal-face');this.classList.add('fallback-face');this.src='https://trivela.b-cdn.net/26/normalFacesSmall/${baseId}.png';}else{this.onerror=null;this.classList.add('fallback-face');this.src='/Main Assets/boo.png';}"
+    >
+  </div></div></div>`;
+}
+
+// ─── Slot Machine ─────────────────────────────────────────────
+class SlotMachine {
+  constructor(clubs){
+    this.clubs=clubs;
+    this.spinning=false;
+    this._buildReel();
+  }
+
+  _buildReel(){
+    const reel=document.getElementById('slotReel');
+    if(!reel)return;
+    reel.innerHTML='';
+    this.items=[];
+    const passes=5;
+    for(let pass=0;pass<passes;pass++){
+      const shuffled=[...this.clubs].sort(()=>Math.random()-.5);
+      shuffled.forEach(club=>{
+        // FIX 3: always resolve name from map if not present
+        const displayName = club.name || getClubName(club.id);
+        const el=document.createElement('div');
+        el.className='slotmachine-item';
+        el.innerHTML=`<img src="${clubBadgeUrl(club.id)}" alt="" onerror="this.style.opacity='.3'"><div class="slotmachine-item-name">${displayName}</div>`;
+        reel.appendChild(el);
+        this.items.push({el, club:{...club, name:displayName}});
+      });
+    }
+    this._snapTo(0);
+  }
+
+  _idxToY(idx){ return 44 - idx*44; }
+
+  _snapTo(idx){
+    const reel=document.getElementById('slotReel');
+    if(!reel)return;
+    reel.style.transition='none';
+    reel.style.transform=`translateY(${this._idxToY(idx)}px)`;
+  }
+
+  spin(cb){
+    if(this.spinning)return;
+    this.spinning=true;
+    document.getElementById('btnSpin').disabled=true;
+
+    this._buildReel();
+    const reel=document.getElementById('slotReel');
+    if(!reel)return;
+
+    const winningClub=this.clubs[Math.floor(Math.random()*this.clubs.length)];
+
+    const minIdx=Math.floor(this.items.length*0.45);
+    const maxIdx=Math.floor(this.items.length*0.85);
+    const candidates=this.items
+      .map((item,i)=>({item,i}))
+      .filter(({item,i})=>item.club.id===winningClub.id&&i>=minIdx&&i<=maxIdx);
+
+    const chosen=candidates[Math.floor(Math.random()*candidates.length)];
+    const landIdx=chosen?chosen.i:minIdx;
+
+    reel.getBoundingClientRect();
+
+    const startY=this._idxToY(0);
+    const endY=this._idxToY(landIdx);
+    const totalDY=startY-endY;
+
+    const DUR=3200;
+    const t0=performance.now();
+    const ease=t=>t<0.5?4*t*t*t:(1-Math.pow(-2*t+2,3)/2);
+
+    const tick=(now)=>{
+      const raw=(now-t0)/DUR;
+      const t=Math.min(raw,1);
+      const y=startY-totalDY*ease(t);
+      reel.style.transition='none';
+      reel.style.transform=`translateY(${y}px)`;
+      if(t<1){requestAnimationFrame(tick);return;}
+      this._snapTo(landIdx);
+      this.spinning=false;
+      cb(this.items[landIdx]?.club || winningClub);
+    };
+    requestAnimationFrame(tick);
+  }
+}
+
+// ─── Game state ───────────────────────────────────────────────
+let allPlayers=[],colorMap={};
+let chosenFm=null,myClub=null;
+let slots=[];
+let pendingPlayer=null;
+let slotMachine=null;
+let seasonResults=[];
+let spinHistory=[];
+
+// ─── Boot ─────────────────────────────────────────────────────
+(async function boot(){
+  try{
+    document.getElementById('game-loading').style.display='flex';
+    enrichLeagueClubs(); // FIX 3: populate names from map
+    [colorMap,allPlayers]=await Promise.all([fetchColorMap(),fetchAllPlayersRaw()]);
+    window.colorMap=colorMap;
+    document.getElementById('game-loading').style.display='none';
+    startFormationPhase();
+  }catch(err){
+    console.error('[38-0-0] boot error:',err);
+    document.getElementById('loadingLabel').textContent='Error loading data.';
+  }
+})();
+
+// ─── Phase 1: Formation ───────────────────────────────────────
+function startFormationPhase(){
+  renderClubRatingList();
+  const pool=[...FORMATIONS].sort(()=>Math.random()-.5).slice(0,6);
+  const grid=document.getElementById('formationGrid');
+  grid.innerHTML='';
+  chosenFm=null;
+  document.getElementById('btnConfirmFormation').disabled=true;
+  pool.forEach(fm=>{
+    const card=document.createElement('div');
+    card.className='formation-card';
+    card.innerHTML=`<div class="fc-name">${fm.name}</div><div style="font-family:'Roboto Condensed',sans-serif;font-size:11px;color:var(--muted)">${fm.positions.join(' · ')}</div>`;
+    card.addEventListener('click',()=>{
+      grid.querySelectorAll('.formation-card').forEach(c=>c.classList.remove('selected'));
+      card.classList.add('selected');
+      chosenFm=fm;
+      document.getElementById('btnConfirmFormation').disabled=false;
+    });
+    grid.appendChild(card);
+  });
+  showPhase('phase-formation');
+}
+
+document.getElementById('btnConfirmFormation').addEventListener('click',()=>{
+  if(!chosenFm)return;
+  slots=chosenFm.positions.map(pos=>({pos,filled:false,player:null}));
+  pendingPlayer=null;
+  myClub=null;
+  spinHistory=[];
+  startBuildPhase();
+});
+
+// ─── Phase 2: Build ───────────────────────────────────────────
+function startBuildPhase(){
+  showPhase('phase-build');
+  slotMachine=new SlotMachine(getSpinClubs());
+  bindSpinButton();
+  renderPitch();
+  updateProgress();
+  updateTeamRatingStars();
+  document.getElementById('postSpinArea').style.display='none';
+  document.getElementById('teamBar').style.display='none';
+  document.getElementById('btnSimWrap').style.display='none';
+  document.getElementById('fallbackBanner').style.display='none';
+  document.getElementById('btnSpin').disabled=false;
+  document.getElementById('teamRatingStars').style.display='none';
+}
+
+function bindSpinButton(){
+  const btn=document.getElementById('btnSpin');
+  if(!btn)return;
+  const fresh=btn.cloneNode(true);
+  btn.parentNode.replaceChild(fresh,btn);
+  fresh.addEventListener('click',()=>{
+    if(!slotMachine||slotMachine.spinning)return;
+    if(pendingPlayer){
+      alert('Pick a position for your selected player first!');
+      return;
+    }
+    document.getElementById('postSpinArea').style.display='none';
+    document.getElementById('fallbackBanner').style.display='none';
+    renderPitch();
+    slotMachine.spin(onSpinLanded);
+  });
+}
+
+function onSpinLanded(club){
+  myClub=club;
+  const clubData = getLeagueClubs().find(c=>c.id===club.id)||club;
+  const tierLabel = { best:'🔴 BEST', mid:'🟠 MID', worst:'🟢 WORST' };
+  // FIX 3: always use name from map if club.name missing
+  const displayName = club.name || getClubName(club.id);
+  document.getElementById('postSpinArea').style.display='';
+  document.getElementById('pendingBanner').style.display='none';
+  document.getElementById('spinBanner').innerHTML=`
+    <div class="spin-club-banner">
+      <img class="spin-club-badge" src="${clubBadgeUrl(club.id)}" alt="${escAttr(displayName)}" onerror="this.style.opacity='.2'">
+      <div class="spin-club-text">
+        <div class="spin-club-sub">${tierLabel[clubData.tier]||''}</div>
+        <div class="spin-club-name">${displayName}</div>
+        <div class="spin-club-sub" style="margin-top:2px">Strength: <strong>${clubData.team_rating||'?'}/99</strong> — pick a player then click their pitch position</div>
+      </div>
+    </div>`;
+  showPicker(club);
+  document.getElementById('btnSpin').disabled=true;
+}
+
+// ─── Picker ───────────────────────────────────────────────────
+// FIX 4 + FIX 5: special club bypass + show all cards (greyed if ineligible)
+function showPicker(club){
+  const isSpecial = SPECIAL_CLUB_IDS.has(String(club.id));
+  const usedIds=new Set(slots.filter(s=>s.filled&&s.player).map(s=>s.player?.mapValue?.fields?.id?.stringValue).filter(Boolean));
+  const openSlots=slots.filter(s=>!s.filled).map(s=>s.pos);
+
+  // FIX 4: for special clubs, skip the base-card color check
+  const eligible=allPlayers.filter(p=>{
+    const f=p?.mapValue?.fields||{};
+    if(!isSpecial && !isBaseCard(f.color?.stringValue)) return false;
+    if(String(f.clubId?.integerValue||'')!==String(club.id)) return false;
+    if(usedIds.has(f.id?.stringValue)) return false;
+    return openSlots.some(sp=>playerCanFillSlot(f,sp));
+  });
+
+  // FIX 5: also gather ineligible cards from same club (base cards that don't fit open slots)
+  const ineligible=allPlayers.filter(p=>{
+    const f=p?.mapValue?.fields||{};
+    if(!isSpecial && !isBaseCard(f.color?.stringValue)) return false;
+    if(String(f.clubId?.integerValue||'')!==String(club.id)) return false;
+    if(usedIds.has(f.id?.stringValue)) return false;
+    // Has no open slot it can fill
+    return !openSlots.some(sp=>playerCanFillSlot(f,sp));
+  });
+
+  if(eligible.length===0 && ineligible.length===0){
+    autoFallback(club);
+    return;
+  }
+
+  // If no eligible but some ineligible exist, still show them greyed + trigger fallback message
+  if(eligible.length===0){
+    autoFallback(club);
+    // Still show ineligible below the fallback banner
+  }
+
+  eligible.sort((a,b)=>parseInt(b?.mapValue?.fields?.rating?.integerValue||0)-parseInt(a?.mapValue?.fields?.rating?.integerValue||0));
+  ineligible.sort((a,b)=>parseInt(b?.mapValue?.fields?.rating?.integerValue||0)-parseInt(a?.mapValue?.fields?.rating?.integerValue||0));
+
+  const displayName = club.name || getClubName(club.id);
+  const grid=document.getElementById('pickerGrid');
+  document.getElementById('pickerTitle').textContent=`Pick a player from ${displayName}`;
+  document.getElementById('pickerSubtitle').textContent=
+    `${eligible.length} eligible — ${ineligible.length} greyed (no open position)`;
+  document.getElementById('pickerArea').style.display='';
+  grid.innerHTML=`<div class="picker-empty"><div class="mf-spinner" style="width:28px;height:28px;border-width:3px"></div></div>`;
+
+  requestAnimationFrame(()=>{
+    grid.innerHTML='';
+
+    // Eligible cards
+    eligible.slice(0,24).forEach(p=>{
+      grid.appendChild(makePickerCard(p, false));
+    });
+
+    // FIX 5: Ineligible cards — greyed out, section label
+    if(ineligible.length > 0){
+      const lbl = document.createElement('div');
+      lbl.className = 'picker-section-label';
+      lbl.textContent = `No open position (${ineligible.length})`;
+      grid.appendChild(lbl);
+      ineligible.slice(0,12).forEach(p=>{
+        grid.appendChild(makePickerCard(p, true));
+      });
+    }
+  });
+}
+
+function makePickerCard(p, isIneligible){
+  const f=p?.mapValue?.fields||{};
+  const wrap=document.createElement('div');
+  wrap.className='picker-card-wrap' + (isIneligible ? ' ineligible' : '');
+  if(isIneligible){
+    wrap.title = `${f.name?.stringValue||'?'} — no open position for ${getPlayerPositions(f).join('/')}`;
+  }
+  const box=document.createElement('div');
+  box.className='pcard-box';
+  const scaler=document.createElement('div');
+  scaler.className='pcard-scaler';
+  try{scaler.innerHTML=buildCardHTML(p,colorMap);}
+  catch(e){scaler.innerHTML=`<div style="padding:12px;font-size:11px;color:var(--muted);text-align:center">${f.name?.stringValue||'?'}</div>`;}
+  box.appendChild(scaler);
+  const nameEl=document.createElement('div');
+  nameEl.className='pcard-name';
+  nameEl.textContent=f.name?.stringValue||'Unknown';
+  const ratingEl=document.createElement('div');
+  ratingEl.className='pcard-rating';
+  ratingEl.textContent=`${f.rating?.integerValue||'?'} ${getPlayerPositions(f).join('/')}`;
+  wrap.appendChild(box);wrap.appendChild(nameEl);wrap.appendChild(ratingEl);
+  if(!isIneligible){
+    wrap.addEventListener('click',()=>{
+      document.getElementById('pickerGrid').querySelectorAll('.picker-card-wrap').forEach(w=>w.classList.remove('chosen'));
+      wrap.classList.add('chosen');
+      selectPendingPlayer(p);
+    });
+  }
+  return wrap;
+}
+
+function selectPendingPlayer(player){
+  pendingPlayer=player;
+  const f=player?.mapValue?.fields||{};
+  const name=f.name?.stringValue||'Unknown';
+  const allPos=getPlayerPositions(f);
+  document.getElementById('pendingBanner').style.display='';
+  document.getElementById('pendingBanner').innerHTML=`
+    <div class="pending-banner">${name}
+      <span>Can play: ${allPos.join(', ')} — click a highlighted pitch slot ↓</span>
+    </div>`;
+  renderPitch(allPos);
+}
+
+function onPitchSlotClick(slotIdx){
+  if(!pendingPlayer)return;
+  const slot=slots[slotIdx];
+  if(slot.filled)return;
+  const f=pendingPlayer?.mapValue?.fields||{};
+  if(!playerCanFillSlot(f,slot.pos))return;
+  confirmPick(slotIdx,pendingPlayer);
+}
+window.onPitchSlotClick=onPitchSlotClick;
+
+function autoFallback(club){
+  const usedIds=new Set(slots.filter(s=>s.filled&&s.player).map(s=>s.player?.mapValue?.fields?.id?.stringValue).filter(Boolean));
+  const openSlots=slots.filter(s=>!s.filled).map(s=>s.pos);
+  let pool=allPlayers.filter(p=>{
+    const f=p?.mapValue?.fields||{};
+    const color=(f.color?.stringValue||'').toLowerCase();
+    if(usedIds.has(f.id?.stringValue))return false;
+    if(color!=='bronze'&&color!=='rare_bronze')return false;
+    return openSlots.some(sp=>playerCanFillSlot(f,sp));
+  });
+  if(!pool.length)pool=allPlayers.filter(p=>!usedIds.has(p?.mapValue?.fields?.id?.stringValue));
+  const pick=pool[Math.floor(Math.random()*pool.length)]||allPlayers[0];
+  const ff=pick?.mapValue?.fields||{};
+  const displayName = club.name || getClubName(club.id);
+  document.getElementById('fallbackBanner').style.display='';
+  document.getElementById('fallbackBanner').innerHTML=`⚠️ No eligible base cards at <b>${displayName}</b> — auto-picking <b>${ff.name?.stringValue||'Unknown'}</b>. Click any open position.`;
+  selectPendingPlayer(pick);
+  document.getElementById('pickerArea').style.display='none';
+}
+
+function confirmPick(slotIdx,player){
+  slots[slotIdx].filled=true;
+  slots[slotIdx].player=player;
+  pendingPlayer=null;
+
+  renderPitch();
+  updateProgress();
+  updateTeamRatingStars();
+  renderTeamBar();
+
+  document.getElementById('pendingBanner').style.display='none';
+  document.getElementById('pickerArea').style.display='none';
+  document.getElementById('pickerGrid').innerHTML='';
+  document.getElementById('postSpinArea').style.display='none';
+  document.getElementById('spinBanner').innerHTML='';
+  document.getElementById('fallbackBanner').style.display='none';
+
+  const filled=slots.filter(s=>s.filled).length;
+  if(filled>=11){
+    document.getElementById('wheelArea').innerHTML=`
+      <div style="font-family:'Cruyff Sans Expanded',sans-serif;font-size:20px;font-weight:900;color:var(--dark);margin-bottom:6px">Team Complete! 🎉</div>
+      <p style="font-family:'Roboto Condensed',sans-serif;font-size:13px;color:var(--muted)">Simulate your 38-match ${LEAGUES[activeLeague].name} season below.</p>`;
+    document.getElementById('btnSimWrap').style.display='';
+  } else {
+    const spinBtn=document.getElementById('btnSpin');
+    if(spinBtn)spinBtn.disabled=false;
+  }
+}
+
+function updateProgress(){
+  const filled=slots.filter(s=>s.filled).length;
+  document.getElementById('buildProgress').style.width=`${(filled/11)*100}%`;
+  document.getElementById('buildProgressLabel').textContent=`${filled}/11`;
+}
+
+function calcTeamRating(){
+  const filled = slots.filter(s=>s.filled&&s.player);
+  if(!filled.length) return 0;
+  const sum = filled.reduce((acc,slot)=>{
+    const rat = parseInt(slot.player?.mapValue?.fields?.rating?.integerValue||0);
+    return acc + rat;
+  }, 0);
+  return Math.round(sum / filled.length);
+}
+
+function updateTeamRatingStars(){
+  const rating = calcTeamRating();
+  const filled = slots.filter(s=>s.filled).length;
+  const starsEl = document.getElementById('teamRatingStars');
+  const starsWrap = document.getElementById('starsWrap');
+  const ratingVal = document.getElementById('starRatingVal');
+  if(!starsEl) return;
+  if(!filled){ starsEl.style.display='none'; return; }
+  starsEl.style.display='flex';
+  const minR=50, maxR=99;
+  const clamped=Math.max(minR,Math.min(maxR,rating));
+  const starFloat=((clamped-minR)/(maxR-minR))*5;
+  const fullStars=Math.floor(starFloat);
+  const hasHalf=(starFloat-fullStars)>=0.3;
+  let html='';
+  for(let i=0;i<5;i++){
+    if(i<fullStars) html+=`<span class="star on">★</span>`;
+    else if(i===fullStars&&hasHalf) html+=`<span class="star half">★</span>`;
+    else html+=`<span class="star off">★</span>`;
+  }
+  starsWrap.innerHTML=html;
+  ratingVal.textContent=`${rating}/99`;
+}
+
+function getPitchLayout(positions){
+  const rowY={GK:90,LWB:74,RWB:74,LB:74,RB:74,CB:74,CDM:60,LM:46,RM:46,CM:46,LW:22,RW:22,CAM:34,CF:22,ST:12};
+  const rows={};
+  positions.forEach((pos,i)=>{
+    const y=rowY[pos]||46;
+    if(!rows[y])rows[y]=[];
+    rows[y].push({pos,origIdx:i});
+  });
+  const layout=[];
+  Object.entries(rows).sort((a,b)=>b[0]-a[0]).forEach(([y,items])=>{
+    const n=items.length;
+    items.forEach((item,j)=>{
+      const x=n===1?50:10+(j*(80/(n-1)));
+      layout.push({...item,x,y:parseFloat(y)});
+    });
+  });
+  layout.sort((a,b)=>a.origIdx-b.origIdx);
+  return layout;
+}
+
+function renderPitch(eligiblePlayerPositions=[]){
+  const positions=slots.map(s=>s.pos);
+  const layout=getPitchLayout(positions);
+  const H=400;
+  let html=`<div class="pitch-container" style="height:${H}px">
+  <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 100 ${H}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <line x1="10" y1="${H*.5}" x2="90" y2="${H*.5}" stroke="rgba(255,255,255,.1)" stroke-width=".4"/>
+    <ellipse cx="50" cy="${H*.5}" rx="15" ry="${H*.12}" fill="none" stroke="rgba(255,255,255,.1)" stroke-width=".4"/>
+    <rect x="26" y="${H*.06}" width="48" height="${H*.18}" fill="none" stroke="rgba(255,255,255,.1)" stroke-width=".4"/>
+    <rect x="38" y="${H*.06}" width="24" height="${H*.08}" fill="none" stroke="rgba(255,255,255,.1)" stroke-width=".4"/>
+    <rect x="26" y="${H*.76}" width="48" height="${H*.18}" fill="none" stroke="rgba(255,255,255,.1)" stroke-width=".4"/>
+    <rect x="38" y="${H*.86}" width="24" height="${H*.08}" fill="none" stroke="rgba(255,255,255,.1)" stroke-width=".4"/>
+  </svg>`;
+  layout.forEach((ls,i)=>{
+    const slot=slots[i];
+    const px=ls.x,py=ls.y;
+    if(slot.filled&&slot.player){
+      const f=slot.player?.mapValue?.fields||{};
+      const rating=f.rating?.integerValue||'?';
+      const name=f.name?.stringValue||'?';
+      const color=(f.color?.stringValue||'default').toLowerCase().trim();
+      const idRaw=(f.id?.stringValue||'').replace(/^id/,'');
+      const baseId=f.baseId?.integerValue||idRaw;
+      const cm=colorMap[color]||{};
+      const bg=cm.url_micro||cm.url_small||`https://mf-data.b-cdn.net/26/Colors/${color}_micro.png`;
+      const short=name.split(' ').slice(-1)[0];
+      html+=`<div class="pitch-slot" style="left:${px}%;top:${py}%">
+        <div class="pitch-card-mini">
+          <img class="pcm-bg" src="${bg}" alt="" onerror="this.src='https://mf-data.b-cdn.net/26/Colors/gold_micro.png'">
+          <img class="pcm-face" src="https://trivela.b-cdn.net/26/normalFacesSmall/${idRaw}.png" alt="" onerror="this.src='https://trivela.b-cdn.net/26/normalFacesSmall/${baseId}.png'">
+        </div>
+        <div class="pitch-slot-rating">${rating}</div>
+        <div class="pitch-slot-name">${short}</div>
+      </div>`;
+    } else {
+      const isEligible=eligiblePlayerPositions.length>0&&eligiblePlayerPositions.includes(slot.pos);
+      const cls=isEligible?' eligible-slot':'';
+      const click=isEligible?`onclick="onPitchSlotClick(${i})"` : '';
+      html+=`<div class="pitch-slot${cls}" style="left:${px}%;top:${py}%" ${click}><div class="pitch-slot-empty">${slot.pos}</div></div>`;
+    }
+  });
+  html+='</div>';
+  document.getElementById('pitchWrap').innerHTML=html;
+}
+
+function makeThumbItem(slot, big=false){
+  const item=document.createElement('div');
+  item.className=big?'ftbar-item':'tbar-item';
+  const thumb=document.createElement('div');
+  thumb.className=big?'ftbar-card-thumb':'tbar-card-thumb';
+  try{thumb.innerHTML=buildCardHTML(slot.player,colorMap);}
+  catch(e){const f=slot.player?.mapValue?.fields||{};thumb.innerHTML=`<div style="font-size:9px;padding:2px;color:var(--muted)">${f.name?.stringValue||'?'}</div>`;}
+  const lbl=document.createElement('div');
+  lbl.className=big?'ftbar-item-pos':'tbar-item-pos';
+  lbl.textContent=slot.pos;
+  item.appendChild(thumb);item.appendChild(lbl);
+  return item;
+}
+function renderTeamBar(){
+  const bar=document.getElementById('teamBar');
+  const filled=slots.filter(s=>s.filled);
+  if(!filled.length){bar.style.display='none';return;}
+  bar.style.display='flex';bar.innerHTML='';
+  filled.forEach(slot=>bar.appendChild(makeThumbItem(slot,false)));
+}
+
+// ─── Season simulation ────────────────────────────────────────
+
+// ─── AI Club stat table ───────────────────────────────────────
+// AC = (Attacking + Control) combined strength 0-99
+// DGK = (Defence + GK) combined strength 0-99
+const CLUB_STATS = {
+  // Premier League
+  "9":   { ac:88, dgk:83 }, // Liverpool
+  "10":  { ac:89, dgk:86 }, // Man City
+  "1":   { ac:87, dgk:85 }, // Arsenal
+  "5":   { ac:85, dgk:82 }, // Chelsea
+  "11":  { ac:84, dgk:80 }, // Man Utd
+  "2":   { ac:83, dgk:81 }, // Aston Villa
+  "13":  { ac:82, dgk:79 }, // Newcastle
+  "1808":{ ac:81, dgk:79 }, // Brighton
+  "1943":{ ac:79, dgk:77 }, // Bournemouth
+  "106": { ac:78, dgk:76 }, // Sunderland
+  "7":   { ac:77, dgk:75 }, // Everton
+  "1925":{ ac:76, dgk:75 }, // Brentford
+  "1799":{ ac:74, dgk:73 }, // Crystal Palace
+  "144": { ac:72, dgk:72 }, // Fulham
+  "18":  { ac:70, dgk:69 }, // Spurs
+  "14":  { ac:66, dgk:65 }, // Nott'm Forest
+  "1800":{ ac:64, dgk:64 }, // Burnley (rel)
+  "8":   { ac:66, dgk:65 }, // Leeds
+  "1952":{ ac:60, dgk:59 }, // Hull
+  "94":  { ac:45, dgk:43 }, // Ipswich
+  // LaLiga
+  "241": { ac:94, dgk:90 }, // Barcelona
+  "243": { ac:93, dgk:91 }, // Real Madrid
+  "240": { ac:88, dgk:85 }, // Atletico
+  "483": { ac:82, dgk:79 }, // Villarreal
+  "481": { ac:81, dgk:78 }, // Sevilla
+  "461": { ac:78, dgk:76 }, // Valencia
+  "457": { ac:78, dgk:75 }, // Real Sociedad
+  "449": { ac:77, dgk:74 }, // Real Betis
+  "448": { ac:76, dgk:73 }, // Athletic
+  "110062":{ ac:74, dgk:71}, // Girona
+  "479": { ac:72, dgk:70 }, // Osasuna
+  "480": { ac:71, dgk:68 }, // Rayo
+  "450": { ac:70, dgk:68 }, // Celta
+  "453": { ac:69, dgk:67 }, // Mallorca
+  "1860":{ ac:68, dgk:66 }, // Getafe
+  "463": { ac:67, dgk:65 }, // Alaves
+  "1853":{ ac:66, dgk:63 }, // Levante
+  "472": { ac:64, dgk:62 }, // Las Palmas
+  "110827":{ ac:63, dgk:61}, // Oviedo
+  "468": { ac:61, dgk:60 }, // Elche
+  // Championship
+  "110": { ac:77, dgk:74 }, // Wolves
+  "1796":{ ac:76, dgk:73 }, // Burnley
+  "88":  { ac:75, dgk:72 }, // Birmingham
+  "109": { ac:74, dgk:72 }, // West Brom
+  "1792":{ ac:73, dgk:71 }, // Norwich
+  "3":   { ac:72, dgk:70 }, // Blackburn
+  "1960":{ ac:71, dgk:69 }, // Swansea
+  "1923":{ ac:71, dgk:68 }, // Luton
+  "1806":{ ac:70, dgk:68 }, // Stoke
+  "12":  { ac:69, dgk:67 }, // Middlesbrough
+  "1919":{ ac:69, dgk:67 }, // Bristol City
+  "1801":{ ac:67, dgk:65 }, // Preston
+  "1961":{ ac:66, dgk:64 }, // Cardiff
+  "91":  { ac:65, dgk:64 }, // Derby
+  "1807":{ ac:65, dgk:63 }, // Sheffield Wed
+  "15":  { ac:63, dgk:62 }, // QPR
+  "1947":{ ac:62, dgk:60 }, // Wrexham
+  "89":  { ac:63, dgk:61 }, // Charlton
+  "1939":{ ac:61, dgk:59 }, // Huddersfield
+  "97":  { ac:63, dgk:61 }, // Millwall
+  "149": { ac:59, dgk:57 }, // Lincoln
+};
+
+function getClubStats(clubId) {
+  return CLUB_STATS[String(clubId)] || {
+    ac: 65 + Math.round((Math.random() - 0.5) * 8),
+    dgk: 63 + Math.round((Math.random() - 0.5) * 8)
+  };
+}
+
+// ─── User team stat calculation ───────────────────────────────
+function calcUserStats() {
+  let sumRating = 0, sumSHO = 0, sumATKf = 0, sumPAS = 0, sumDRI = 0, sumCTLf = 0;
+  let sumDEF = 0, sumPHY = 0, sumDEFf = 0;
+  let gkRating = 0;
+  let outfieldCount = 0, total = 0;
+
+  slots.filter(s => s.filled && s.player).forEach(slot => {
+    const f = slot.player?.mapValue?.fields || {};
+    const rat  = parseInt(f.rating?.integerValue  || 55);
+    const sho  = parseInt(f.SHO?.integerValue     || 45);
+    const pas  = parseInt(f.PAS?.integerValue     || 45);
+    const dri  = parseInt(f.DRI?.integerValue     || 45);
+    const def  = parseInt(f.DEF?.integerValue     || 45);
+    const phy  = parseInt(f.PHY?.integerValue     || 45);
+    const atk  = parseInt(f.attack?.integerValue  || 45);
+    const ctl  = parseInt(f.control?.integerValue || 45);
+    const defF = parseInt(f.defense?.integerValue || 45);
+
+    sumRating += rat;
+    total++;
+
+    if (slot.pos === 'GK') {
+      gkRating = rat * 0.5 + def * 0.3 + ctl * 0.2;
+    } else {
+      sumSHO  += sho;
+      sumATKf += atk;
+      sumPAS  += pas;
+      sumDRI  += dri;
+      sumCTLf += ctl;
+      sumDEF  += def;
+      sumPHY  += phy;
+      sumDEFf += defF;
+      outfieldCount++;
+    }
+  });
+
+  const n = outfieldCount || 1;
+  const avgSHO  = sumSHO  / n;
+  const avgATKf = sumATKf / n;
+  const avgPAS  = sumPAS  / n;
+  const avgDRI  = sumDRI  / n;
+  const avgCTLf = sumCTLf / n;
+  const avgDEF  = sumDEF  / n;
+  const avgPHY  = sumPHY  / n;
+  const avgDEFf = sumDEFf / n;
+  const avgRat  = total ? sumRating / total : 55;
+
+  // AC: weighted blend of shooting and fatal attack (attacking) + passing/dribbling/fatal ctl (control)
+  const attacking = avgSHO * 0.6 + avgATKf * 0.4;
+  const control   = avgPAS * 0.4 + avgDRI * 0.35 + avgCTLf * 0.25;
+  const ac  = attacking * 0.55 + control * 0.45;
+
+  // DGK: defence stats + GK
+  const defence = avgDEF * 0.5 + avgPHY * 0.25 + avgDEFf * 0.25;
+  const dgk = defence * 0.65 + (gkRating || avgRat * 0.9) * 0.35;
+
+  return { ac, dgk, rating: avgRat };
+}
+
+// ─── Core match engine ────────────────────────────────────────
+// AC generates a shot pool; opponent DGK filters it.
+// Returns { result, gf, ga }
+function simMatchV2(myAC, myDGK, myRating, oppAC, oppDGK, oppRating, venue) {
+  const homeBonus = venue === 'H' ? 3.5 : venue === 'A' ? -2 : 0;
+
+  // Potential goals = AC scaled to ~0-6 range with variance
+  function potentialGoals(ac, ratingBonus) {
+    const base = (ac / 99) * 4.2 + (ratingBonus / 99) * 0.8;
+    const noise = (Math.random() + Math.random() + Math.random()) / 3; // 0-1 bell-ish
+    return base * (0.55 + noise * 0.9);
+  }
+
+  // Goals through = potential * (1 - how much DGK blocks)
+  function goalsThrough(potential, attackerAC, defenderDGK) {
+    const ratio = defenderDGK / (attackerAC + defenderDGK + 0.001);
+    const blockRate = ratio * 0.75 + Math.random() * 0.12 - 0.06;
+    const clamped = Math.max(0, Math.min(0.92, blockRate));
+    return Math.max(0, potential * (1 - clamped));
+  }
+
+  const effMyAC  = myAC  + homeBonus;
+  const effOppAC = oppAC - homeBonus * 0.4;
+
+  const myPot  = potentialGoals(effMyAC,  myRating);
+  const oppPot = potentialGoals(effOppAC, oppRating);
+
+  const myRaw  = goalsThrough(myPot,  effMyAC,  oppDGK);
+  const oppRaw = goalsThrough(oppPot, effOppAC, myDGK);
+
+  let gf = Math.round(myRaw);
+  let ga = Math.round(oppRaw);
+
+  // Draw only when raw values are naturally very close
+  const diff = Math.abs(myRaw - oppRaw);
+  if (diff < 0.42 && Math.random() < 0.72) {
+    const avg = Math.round((myRaw + oppRaw) / 2);
+    gf = avg; ga = avg;
+  }
+
+  const result = gf > ga ? 'W' : gf < ga ? 'L' : 'D';
+  return { result, gf, ga };
+}
+
+document.getElementById('btnSimulate').addEventListener('click', async function () {
+  this.disabled = true;
+  this.textContent = 'Simulating…';
+
+  const userStats  = calcUserStats();
+  const teamRating = calcTeamRating();
+  seasonResults = [];
+
+  const userClubId = myClub ? myClub.id : getLeagueClubs()[0].id;
+  const fixtures   = buildFixtures(userClubId);
+
+  let pts = 0, wins = 0, draws = 0, losses = 0;
+
+  for (let m = 0; m < 38; m++) {
+    const opp   = fixtures[m];
+    const oppSt = getClubStats(opp.id);
+    const match = simMatchV2(
+      userStats.ac, userStats.dgk, userStats.rating,
+      oppSt.ac,     oppSt.dgk,     opp.team_rating || 70,
+      opp.venue
+    );
+    if (match.result === 'W')      { pts += 3; wins++; }
+    else if (match.result === 'D') { pts += 1; draws++; }
+    else                           { losses++; }
+
+    seasonResults.push({
+      matchday: m + 1,
+      opponent: opp.name,
+      clubId:   opp.id,
+      venue:    opp.venue,
+      oppRating: opp.team_rating,
+      ...match,
+      pts
+    });
+    if (m % 5 === 0) await new Promise(r => setTimeout(r, 0));
+  }
+
+  renderSeasonPhase(pts, wins, draws, losses, userClubId, teamRating);
+});
+
+function calcStrength() {
+  return calcUserStats().ac;
+}
+
+// ─── Full league table simulation ────────────────────────────
+function buildFullLeagueTable(userClubId, userPts, userW, userD, userL, userGF, userGA) {
+  const table = [];
+
+  getLeagueClubs().forEach(club => {
+    if (club.id === userClubId) {
+      table.push({
+        id: club.id, name: club.name,
+        p: 38, w: userW, d: userD, l: userL,
+        gf: userGF, ga: userGA,
+        gd: userGF - userGA, pts: userPts, isUser: true
+      });
+    } else {
+      const st  = getClubStats(club.id);
+      let w = 0, d = 0, l = 0, gf = 0, ga = 0;
+
+      for (let m = 0; m < 38; m++) {
+        // Pick a random opponent from the league for each game
+        const others = getLeagueClubs().filter(c => c.id !== club.id);
+        const opp    = others[Math.floor(Math.random() * others.length)];
+        const oppSt  = getClubStats(opp.id);
+        const venue  = Math.random() < 0.5 ? 'H' : 'A';
+        const match  = simMatchV2(st.ac, st.dgk, club.team_rating || 70,
+                                  oppSt.ac, oppSt.dgk, opp.team_rating || 70, venue);
+        if (match.result === 'W')      { w++; gf += match.gf; ga += match.ga; }
+        else if (match.result === 'D') { d++; gf += match.gf; ga += match.ga; }
+        else                           { l++; gf += match.gf; ga += match.ga; }
+      }
+
+      table.push({
+        id: club.id, name: club.name,
+        p: 38, w, d, l, gf, ga,
+        gd: gf - ga, pts: w * 3 + d, isUser: false
+      });
+    }
+  });
+
+  table.sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
+  return table;
+}
+
+// ─── Play again ───────────────────────────────────────────────
+document.getElementById('btnPlayAgain').addEventListener('click',()=>{
+  slots=[];pendingPlayer=null;chosenFm=null;seasonResults=[];myClub=null;spinHistory=[];
+  slotMachine=null;
+  window._leagueTable=null;
+
+  document.getElementById('wheelArea').innerHTML=`
+    <div class="slotmachine-wrap">
+      <div class="slotmachine-outer" id="slotMachineOuter">
+        <div class="slotmachine-highlight"></div>
+        <div class="slotmachine-pointer"></div>
+        <div class="slotmachine-pointer-r"></div>
+        <div class="slotmachine-reel" id="slotReel"></div>
+      </div>
+      <div class="spin-btn-wrap">
+        <button class="spin-btn" id="btnSpin">▶ SPIN FOR A CLUB</button>
+      </div>
+    </div>`;
+
+  const simBtn=document.getElementById('btnSimulate');
+  const freshSim=simBtn.cloneNode(true);
+  simBtn.parentNode.replaceChild(freshSim,simBtn);
+  freshSim.textContent='▶ Simulate Season';
+  freshSim.disabled=false;
+  freshSim.addEventListener('click', async function () {
+  this.disabled = true;
+  this.textContent = 'Simulating…';
+  const userStats  = calcUserStats();
+  const teamRating = calcTeamRating();
+  seasonResults = [];
+  const userClubId = myClub ? myClub.id : getLeagueClubs()[0].id;
+  const fixtures   = buildFixtures(userClubId);
+  let pts = 0, wins = 0, draws = 0, losses = 0;
+  for (let m = 0; m < 38; m++) {
+    const opp   = fixtures[m];
+    const oppSt = getClubStats(opp.id);
+    const match = simMatchV2(userStats.ac, userStats.dgk, userStats.rating,
+                             oppSt.ac, oppSt.dgk, opp.team_rating || 70, opp.venue);
+    if (match.result === 'W')      { pts += 3; wins++; }
+    else if (match.result === 'D') { pts += 1; draws++; }
+    else                           { losses++; }
+    seasonResults.push({ matchday: m + 1, opponent: opp.name, clubId: opp.id,
+      venue: opp.venue, oppRating: opp.team_rating, ...match, pts });
+    if (m % 5 === 0) await new Promise(r => setTimeout(r, 0));
+  }
+  renderSeasonPhase(pts, wins, draws, losses, userClubId, teamRating);
+});
+
+  startFormationPhase();
+});
+
+function showPhase(id){
+  document.querySelectorAll('.game-phase').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+}
+</script>
+</body>
+</html>
